@@ -29,14 +29,25 @@ function updateViewCount($conn, $postId) {
     }
 }
 
-// Function to fetch recent posts with pagination
-function fetchRecentPosts($conn, $limit, $offset) {
-    $sql = "SELECT id, judul, isi, images, view FROM posts ORDER BY tanggal_publikasi DESC LIMIT ? OFFSET ?";
+// Function to fetch recent posts with pagination and category filter
+function fetchRecentPosts($conn, $limit, $offset, $kategori = '') {
+    $sql = "SELECT id, judul, isi, images, view FROM posts";
+    if ($kategori) {
+        $sql .= " WHERE kategori = ?";
+    }
+    $sql .= " ORDER BY tanggal_publikasi DESC LIMIT ? OFFSET ?";
+    
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("SQL error: " . $conn->error);
     }
-    $stmt->bind_param("ii", $limit, $offset);
+
+    if ($kategori) {
+        $stmt->bind_param("sii", $kategori, $limit, $offset);
+    } else {
+        $stmt->bind_param("ii", $limit, $offset);
+    }
+
     $stmt->execute();
     return $stmt->get_result();
 }
@@ -52,10 +63,12 @@ $limit = 5;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-$recentPosts = fetchRecentPosts($conn, $limit, $offset);
+// Cek kategori dari URL
+$kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
+$recentPosts = fetchRecentPosts($conn, $limit, $offset, $kategori);
 $trendingPosts = fetchTrendingPosts($conn);
 
-$totalPostsResult = $conn->query("SELECT COUNT(*) as count FROM posts");
+$totalPostsResult = $conn->query("SELECT COUNT(*) as count FROM posts" . ($kategori ? " WHERE kategori = '$kategori'" : ""));
 $totalPosts = $totalPostsResult->fetch_assoc()['count'];
 $totalPages = ceil($totalPosts / $limit);
 
@@ -78,6 +91,7 @@ if (isset($_GET['id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style-starter.css">
     <style>
+        /* Styles tetap sama */
         .sidebar {
             float: right;
             width: 30%;
@@ -116,18 +130,18 @@ if (isset($_GET['id'])) {
             margin-left: 15px;
         }
         .trending-post {
-            margin-bottom: 20px; /* Menambahkan margin bawah untuk jarak antar trending post */
-            padding: 10px; /* Menambahkan padding untuk ruang dalam setiap trending post */
-            border: 1px solid #ddd; /* Menambahkan border untuk memperjelas batas */
-            border-radius: 5px; /* Membuat sudut border sedikit melengkung */
-            background-color: #f9f9f9; /* Memberikan latar belakang sedikit berbeda */
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
         .trending-post h5 {
-            margin: 0 0 5px; /* Mengatur margin untuk heading */
+            margin: 0 0 5px;
         }
         .trending-post p {
-            margin: 0; /* Menghilangkan margin untuk paragraf */
-            font-size: 14px; /* Mengatur ukuran font untuk paragraf */
+            margin: 0;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -155,8 +169,8 @@ if (isset($_GET['id'])) {
                             Categories <span class="fa fa-angle-down"></span>
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item @@cp__active" href="technology.php">Technology posts</a>
-                            <a class="dropdown-item @@ls__active" href="lifestyle.php">Lifestyle posts</a>
+                            <a class="dropdown-item" href="index.php?kategori=technology">Technology posts</a>
+                            <a class="dropdown-item" href="index.php?kategori=lifestyle">Lifestyle posts</a>
                         </div>
                     </li>
                     <li class="nav-item @@about__active">
@@ -166,28 +180,35 @@ if (isset($_GET['id'])) {
                         <a class="nav-link" href="admin.php">Admin Dashboard</a>
                     </li>
                     <div class="mobile-position">
-          <nav class="navigation">
-            <div class="theme-switch-wrapper">
-              <label class="theme-switch" for="checkbox">
-                <input type="checkbox" id="checkbox">
-                <div class="mode-container">
-                  <i class="gg-sun"></i>
-                  <i class="gg-moon"></i>
+                        <nav class="navigation">
+                            <div class="theme-switch-wrapper">
+                                <label class="theme-switch" for="checkbox">
+                                    <input type="checkbox" id="checkbox">
+                                    <div class="mode-container">
+                                        <i class="gg-sun"></i>
+                                        <i class="gg-moon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </nav>
+                    </div>
+                    <!--/search-right-->
+                    <div class="search-right mt-lg-0 mt-2">
+                        <a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
+                        <!-- search popup -->
+                        <div id="search" class="pop-overlay">
+                            <div class="popup">
+                                <h3 class="hny-title two">Search here</h3>
+                                <form action="#" method="Get" class="search-box">
+                                    <input type="search" placeholder="Search for blog posts" name="search" required="required"
+                                        autofocus="">
+                                    <button type="submit" class="btn">Search</button>
+                                </form>
+                                <a class="close" href="#close">×</a>
+                            </div>
+                        </div>
+                    </div>
                 </ul>
-                 <!--/search-right-->
-          <div class="search-right mt-lg-0 mt-2">
-            <a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
-            <!-- search popup -->
-            <div id="search" class="pop-overlay">
-              <div class="popup">
-                <h3 class="hny-title two">Search here</h3>
-                <form action="#" method="Get" class="search-box">
-                  <input type="search" placeholder="Search for blog posts" name="search" required="required"
-                    autofocus="">
-                  <button type="submit" class="btn">Search</button>
-                </form>
-                <a class="close" href="#close">×</a>
-              </div>
             </div>
         </div>
     </nav>
@@ -201,8 +222,8 @@ if (isset($_GET['id'])) {
             if ($recentPosts) {
                 if ($recentPosts->num_rows > 0) {
                     while ($row = $recentPosts->fetch_assoc()) {
-                        echo "<div class='post'>";
-                        echo "<h3><a href='artikel.php?id=" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['judul']) . "</a></h3>";
+                        echo "<div class='trending-post'>"; // Mengubah dari 'post' menjadi 'trending-post'
+                        echo "<h5><a href='artikel.php?id=" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['judul']) . "</a></h5>";
                         echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
                         echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
                         if ($row['images']) {
@@ -220,15 +241,15 @@ if (isset($_GET['id'])) {
 
             <div class="pagination">
                 <?php if ($page > 1): ?>
-                    <a href="?page=<?php echo $page - 1; ?>">Previous</a>
+                    <a href="?page=<?php echo $page - 1; ?>&kategori=<?php echo htmlspecialchars($kategori); ?>">Previous</a>
                 <?php endif; ?>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>">
+                    <a href="?page=<?php echo $i; ?>&kategori=<?php echo htmlspecialchars($kategori); ?>" class="<?php echo $i === $page ? 'active' : ''; ?>">
                         <?php echo $i; ?>
                     </a>
                 <?php endfor; ?>
                 <?php if ($page < $totalPages): ?>
-                    <a href="?page=<?php echo $page + 1; ?>">Next</a>
+                    <a href="?page=<?php echo $page + 1; ?>&kategori=<?php echo htmlspecialchars($kategori); ?>">Next</a>
                 <?php endif; ?>
             </div>
         </div>

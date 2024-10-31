@@ -155,7 +155,7 @@ if (isset($_GET['id'])) {
                             </div>
                         </li>
                         <li class="nav-item @@about__active">
-                            <a class="nav-link" href="crud.php">Admin Dashboard</a>
+                            <a class="nav-link" href="admin.php">Admin Dashboard</a>
                         </li>
                         <div class="mobile-position">
           <nav class="navigation">
