@@ -1,14 +1,12 @@
 <?php
 // Database connection parameters
-$host = "localhost"; // Change if needed
-$user = "root"; // Your MySQL username
-$password = ""; // Your MySQL password
-$database = "berita"; // Name of your database
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "berita";
 
-// Create a connection
 $conn = new mysqli($host, $user, $password, $database);
 
-// Check the connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -50,20 +48,17 @@ function fetchTrendingPosts($conn) {
 }
 
 // Pagination setup
-$limit = 5; // Number of posts per page
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
-$offset = ($page - 1) * $limit; // Calculate offset
+$limit = 5;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-// Fetch recent posts and trending posts
 $recentPosts = fetchRecentPosts($conn, $limit, $offset);
 $trendingPosts = fetchTrendingPosts($conn);
 
-// Get total number of posts for pagination
 $totalPostsResult = $conn->query("SELECT COUNT(*) as count FROM posts");
 $totalPosts = $totalPostsResult->fetch_assoc()['count'];
 $totalPages = ceil($totalPosts / $limit);
 
-// Update view count if a specific post is accessed
 if (isset($_GET['id'])) {
     $postId = (int)$_GET['id'];
     if (updateViewCount($conn, $postId)) {
@@ -107,13 +102,32 @@ if (isset($_GET['id'])) {
             background-color: #007bff;
             color: white;
         }
-        .trending-post h5 a {
-            color: #333;
-            text-decoration: none;
-            transition: color 0.3s ease;
+        .post {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
         }
-        .trending-post h5 a:hover {
-            color: #007bff;
+        .post h3 {
+            margin: 0 10px 0 0;
+        }
+        .post img {
+            max-width: 150px;
+            height: auto;
+            margin-left: 15px;
+        }
+        .trending-post {
+            margin-bottom: 20px; /* Menambahkan margin bawah untuk jarak antar trending post */
+            padding: 10px; /* Menambahkan padding untuk ruang dalam setiap trending post */
+            border: 1px solid #ddd; /* Menambahkan border untuk memperjelas batas */
+            border-radius: 5px; /* Membuat sudut border sedikit melengkung */
+            background-color: #f9f9f9; /* Memberikan latar belakang sedikit berbeda */
+        }
+        .trending-post h5 {
+            margin: 0 0 5px; /* Mengatur margin untuk heading */
+        }
+        .trending-post p {
+            margin: 0; /* Menghilangkan margin untuk paragraf */
+            font-size: 14px; /* Mengatur ukuran font untuk paragraf */
         }
     </style>
 </head>
@@ -151,38 +165,29 @@ if (isset($_GET['id'])) {
                     <li class="nav-item @@about__active">
                         <a class="nav-link" href="admin.php">Admin Dashboard</a>
                     </li>
-                    <!--/search-right-->
-				<div class="search-right mt-lg-0 mt-2">
-					<a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
-					<!-- search popup -->
-					<div id="search" class="pop-overlay">
-						<div class="popup">
-							<h3 class="hny-title two">Search here</h3>
-							<form action="#" method="Get" class="search-box">
-								<input type="search" placeholder="Search for blog posts" name="search"
-									required="required" autofocus="">
-								<button type="submit" class="btn">Search</button>
-							</form>
-							<a class="close" href="#close">×</a>
-						</div>
-					</div>
-					<!-- /search popup -->
-				</div>
-                        <div class="mobile-position">
-                <nav class="navigation">
-                    <div class="theme-switch-wrapper">
-                        <label class="theme-switch" for="checkbox">
-                            <input type="checkbox" id="checkbox">
-                            <div class="mode-container">
-                                <i class="gg-sun"></i>
-                                <i class="gg-moon"></i>
-                            </div>
-                        </label>
-                    </div>
-                </nav>
-            </div>
-            <!-- //toggle switch for light and dark theme -->
+                    <div class="mobile-position">
+          <nav class="navigation">
+            <div class="theme-switch-wrapper">
+              <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox">
+                <div class="mode-container">
+                  <i class="gg-sun"></i>
+                  <i class="gg-moon"></i>
                 </ul>
+                 <!--/search-right-->
+          <div class="search-right mt-lg-0 mt-2">
+            <a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
+            <!-- search popup -->
+            <div id="search" class="pop-overlay">
+              <div class="popup">
+                <h3 class="hny-title two">Search here</h3>
+                <form action="#" method="Get" class="search-box">
+                  <input type="search" placeholder="Search for blog posts" name="search" required="required"
+                    autofocus="">
+                  <button type="submit" class="btn">Search</button>
+                </form>
+                <a class="close" href="#close">×</a>
+              </div>
             </div>
         </div>
     </nav>
@@ -201,7 +206,7 @@ if (isset($_GET['id'])) {
                         echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
                         echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
                         if ($row['images']) {
-                            echo "<img src='uploads/" . htmlspecialchars($row['images']) . "' alt='Image' style='max-width:100%; height:auto;'>";
+                            echo "<img src='uploads/" . htmlspecialchars($row['images']) . "' alt='Image'>";
                         }
                         echo "</div>";
                     }
@@ -213,7 +218,6 @@ if (isset($_GET['id'])) {
             }
             ?>
 
-            <!-- Pagination -->
             <div class="pagination">
                 <?php if ($page > 1): ?>
                     <a href="?page=<?php echo $page - 1; ?>">Previous</a>
@@ -229,17 +233,16 @@ if (isset($_GET['id'])) {
             </div>
         </div>
 
-        <!-- Sidebar for Trending Posts -->
         <div class="sidebar">
-            <h2 class="mb-4">Trending Posts</h2>
+            <h3>Trending Posts</h3>
             <?php
             if ($trendingPosts) {
                 if ($trendingPosts->num_rows > 0) {
                     while ($row = $trendingPosts->fetch_assoc()) {
                         echo "<div class='trending-post'>";
-                        echo "<h5><a href='artikel.php?id=". htmlspecialchars($row['id']) ."'>" . htmlspecialchars($row['judul']) . "</a></h5>"; // Make title clickable
-                        echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
+                        echo "<h5><a href='artikel.php?id=" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['judul']) . "</a></h5>";
                         echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
+                        echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
                         echo "</div>";
                     }
                 } else {
@@ -250,18 +253,21 @@ if (isset($_GET['id'])) {
             }
             ?>
         </div>
+
+        <div class="clearfix"></div>
     </div>
 </div>
 
 <footer>
     <div class="container">
-        <p>&copy; 2024 Web Programming. All Rights Reserved.</p>
+        <p class="text-center">© 2024 Web Programming Blog. All rights reserved.</p>
     </div>
 </footer>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/theme-change.js"></script>
+</body>
+</html>
 
 <?php
 $conn->close();

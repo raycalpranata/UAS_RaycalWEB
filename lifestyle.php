@@ -45,7 +45,7 @@ function fetchLifestylePosts($conn, $limit, $offset) {
 
 // Function to fetch trending posts for Lifestyle category
 function fetchTrendingLifestylePosts($conn) {
-    $sql = "SELECT judul, isi, images, view FROM posts WHERE kategori = 'Lifestyle' ORDER BY view DESC LIMIT 5"; // Adjust limit as needed
+    $sql = "SELECT id, judul, isi, images, view FROM posts WHERE kategori = 'Lifestyle' ORDER BY view DESC LIMIT 5"; // Adjust limit as needed
     return $conn->query($sql);
 }
 
@@ -72,7 +72,6 @@ if (isset($_GET['id'])) {
         echo "Failed to update view count.";
     }
 }
-
 ?>
 
 <!doctype html>
@@ -109,6 +108,20 @@ if (isset($_GET['id'])) {
             background-color: #007bff;
             color: white;
         }
+        .trending-post {
+            margin-bottom: 20px; /* Space between posts */
+            padding: 10px; /* Padding inside each trending post */
+            border: 1px solid #ddd; /* Border for clarity */
+            border-radius: 5px; /* Slightly rounded corners */
+            background-color: #f9f9f9; /* Light background color */
+        }
+        .trending-post h5 {
+            margin: 0 0 5px; /* Margin for heading */
+        }
+        .trending-post p {
+            margin: 0; /* Remove margin for paragraphs */
+            font-size: 14px; /* Font size for paragraphs */
+        }
     </style>
 </head>
 <body>
@@ -143,6 +156,29 @@ if (isset($_GET['id'])) {
                         <li class="nav-item @@about__active">
                             <a class="nav-link" href="crud.php">Admin Dashboard</a>
                         </li>
+                        <div class="mobile-position">
+          <nav class="navigation">
+            <div class="theme-switch-wrapper">
+              <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox">
+                <div class="mode-container">
+                  <i class="gg-sun"></i>
+                  <i class="gg-moon"></i>
+                </ul>
+                 <!--/search-right-->
+          <div class="search-right mt-lg-0 mt-2">
+            <a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
+            <!-- search popup -->
+            <div id="search" class="pop-overlay">
+              <div class="popup">
+                <h3 class="hny-title two">Search here</h3>
+                <form action="#" method="Get" class="search-box">
+                  <input type="search" placeholder="Search for blog posts" name="search" required="required"
+                    autofocus="">
+                  <button type="submit" class="btn">Search</button>
+                </form>
+                <a class="close" href="#close">×</a>
+              </div>
                     </ul>
                 </div>
             </div>
@@ -197,7 +233,7 @@ if (isset($_GET['id'])) {
                     if ($trendingPosts->num_rows > 0) {
                         while ($row = $trendingPosts->fetch_assoc()) {
                             echo "<div class='trending-post'>";
-                            echo "<h5>" . htmlspecialchars($row['judul']) . "</h5>";
+                            echo "<h5><a href='artikel.php?id=" . $row['id'] . "'>" . htmlspecialchars($row['judul']) . "</a></h5>";
                             echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
                             echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
                             if ($row['images']) {
@@ -224,6 +260,7 @@ if (isset($_GET['id'])) {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/theme-change.js"></script>
 </body>
 </html>
 
