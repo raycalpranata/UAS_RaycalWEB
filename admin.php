@@ -114,10 +114,13 @@ $result = $conn->query("SELECT * FROM posts");
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CRUD Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Dashboard - Blog Posts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style-starter.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Cabin', sans-serif;
             background-color: #f0f0f5;
             margin: 0;
             padding: 0;
@@ -130,6 +133,7 @@ $result = $conn->query("SELECT * FROM posts");
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 30px;
         }
         .notification {
             margin-bottom: 20px;
@@ -146,28 +150,46 @@ $result = $conn->query("SELECT * FROM posts");
             color: #721c24;
         }
         form {
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 10px;
-            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        input, select, textarea, button {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            height: 150px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
         th, td {
@@ -176,11 +198,13 @@ $result = $conn->query("SELECT * FROM posts");
             border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
+            font-weight: 600;
         }
         img {
             width: 50px;
             height: auto;
+            border-radius: 4px;
         }
         .actions a {
             margin-right: 10px;
@@ -193,72 +217,135 @@ $result = $conn->query("SELECT * FROM posts");
     </style>
 </head>
 <body>
+<header class="w3l-header">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+        <div class="container">
+            <a class="navbar-brand" href="index.php">
+                <span class="fa fa-pencil-square-o"></span> Web Programming Blog</a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="fa icon-expand fa-bars"></span>
+                <span class="fa icon-close fa-times"></span>
+            </button>
 
-<div class="container">
-    <h1>Blog Posts</h1>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="index.php">Home</a>
+                    </li>
+                    <li class="nav-item dropdown @@category__active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Categories <span class="fa fa-angle-down"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="index.php?kategori=technology">Technology posts</a>
+                            <a class="dropdown-item" href="index.php?kategori=lifestyle">Lifestyle posts</a>
+                        </div>
+                    </li>
+                    <li class="nav-item @@about__active">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item @@about__active">
+                        <a class="nav-link" href="admin.php">Admin Dashboard</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
 
-    <?php if ($success_message): ?>
-        <div class="notification success"><?php echo $success_message; ?></div>
-    <?php elseif ($error_message): ?>
-        <div class="notification error"><?php echo $error_message; ?></div>
-    <?php endif; ?>
+<div class="w3l-homeblock1">
+    <div class="container pt-lg-5 pt-md-4">
+        <h1>Blog Posts Management</h1>
 
-    <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="id" value="<?php echo $id; ?>">
-        <label>Judul</label>
-        <input type="text" name="judul" value="<?php echo $judul; ?>" required>
+        <?php if ($success_message): ?>
+            <div class="notification success"><?php echo $success_message; ?></div>
+        <?php elseif ($error_message): ?>
+            <div class="notification error"><?php echo $error_message; ?></div>
+        <?php endif; ?>
 
-        <label>Isi</label>
-        <textarea name="isi" required><?php echo $isi; ?></textarea>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<?php echo $id; ?>">
+            
+            <div class="form-group">
+                <label>Judul</label>
+                <input type="text" name="judul" value="<?php echo $judul; ?>" required>
+            </div>
 
-        <label>Kategori</label>
-        <select name="kategori">
-            <option value="Technology" <?php echo ($kategori == 'Technology') ? 'selected' : ''; ?>>Technology</option>
-            <option value="Lifestyle" <?php echo ($kategori == 'Lifestyle') ? 'selected' : ''; ?>>Lifestyle</option>
-        </select>
+            <div class="form-group">
+                <label>Isi</label>
+                <textarea name="isi" required><?php echo $isi; ?></textarea>
+            </div>
 
-        <label>Author</label>
-        <input type="text" name="author" value="<?php echo $author; ?>" required>
+            <div class="form-group">
+                <label>Kategori</label>
+                <select name="kategori">
+                    <option value="Technology" <?php echo ($kategori == 'Technology') ? 'selected' : ''; ?>>Technology</option>
+                    <option value="Lifestyle" <?php echo ($kategori == 'Lifestyle') ? 'selected' : ''; ?>>Lifestyle</option>
+                </select>
+            </div>
 
-        <label>Tanggal Publikasi</label>
-        <input type="date" name="tanggal_publikasi" value="<?php echo $tanggal_publikasi; ?>" required>
+            <div class="form-group">
+                <label>Author</label>
+                <input type="text" name="author" value="<?php echo $author; ?>" required>
+            </div>
 
-        <label>Gambar</label>
-        <input type="file" name="images" accept="image/*" required>
+            <div class="form-group">
+                <label>Tanggal Publikasi</label>
+                <input type="date" name="tanggal_publikasi" value="<?php echo $tanggal_publikasi; ?>" required>
+            </div>
 
-        <button type="submit" name="<?php echo $id ? 'update' : 'create'; ?>">
-            <?php echo $id ? 'Update' : 'Create'; ?>
-        </button>
-    </form>
-        
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Judul</th>
-            <th>Isi</th>
-            <th>Kategori</th>
-            <th>Author</th>
-            <th>Tanggal Publikasi</th>
-            <th>Gambar</th>
-            <th>Aksi</th>
-        </tr>
-        <?php while ($row = $result->fetch_assoc()): ?>
+            <div class="form-group">
+                <label>Gambar</label>
+                <input type="file" name="images" accept="image/*" <?php echo $id ? '' : 'required'; ?>>
+            </div>
+
+            <button type="submit" name="<?php echo $id ? 'update' : 'create'; ?>">
+                <?php echo $id ? 'Update Post' : 'Create New Post'; ?>
+            </button>
+        </form>
+            
+        <table>
             <tr>
-                <td><?php echo $row['id']; ?></td>
-                <td><?php echo $row['judul']; ?></td>
-                <td><?php echo $row['isi']; ?></td>
-                <td><?php echo $row['kategori']; ?></td>
-                <td><?php echo $row['author']; ?></td>
-                <td><?php echo $row['tanggal_publikasi']; ?></td>
-                <td><img src="uploads/<?php echo $row['images']; ?>" alt="Image"></td>
-                <td class="actions">
-                    <a href="?edit=<?php echo $row['id']; ?>">Edit</a>
-                    <a href="?delete=<?php echo $row['id']; ?>" onclick="return confirm('Yakin ingin menghapus?')">Delete</a>
-                </td>
+                <th>ID</th>
+                <th>Judul</th>
+                <th>Isi</th>
+                <th>Kategori</th>
+                <th>Author</th>
+                <th>Tanggal Publikasi</th>
+                <th>Gambar</th>
+                <th>Aksi</th>
             </tr>
-        <?php endwhile; ?>
-    </table>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo $row['judul']; ?></td>
+                    <td><?php echo substr($row['isi'], 0, 100) . '...'; ?></td>
+                    <td><?php echo $row['kategori']; ?></td>
+                    <td><?php echo $row['author']; ?></td>
+                    <td><?php echo $row['tanggal_publikasi']; ?></td>
+                    <td><img src="uploads/<?php echo $row['images']; ?>" alt="Image"></td>
+                    <td class="actions">
+                        <a href="?edit=<?php echo $row['id']; ?>">Edit</a>
+                        <a href="?delete=<?php echo $row['id']; ?>" onclick="return confirm('Yakin ingin menghapus?')">Delete</a>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </table>
+    </div>
 </div>
+
+<footer>
+    <div class="container">
+        <p class="text-center">© 2024 Web Programming Blog. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
