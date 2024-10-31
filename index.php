@@ -18,16 +18,16 @@ function updateViewCount($conn, $postId) {
     $sql = "UPDATE posts SET view = view + 1 WHERE id = ?";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
-        die("SQL error: " . $conn->error); // Error handling
+        die("SQL error: " . $conn->error);
     }
     $stmt->bind_param("i", $postId);
     if ($stmt->execute()) {
         $stmt->close();
-        return true; // Successfully updated
+        return true;
     } else {
-        echo "Failed to update view count: " . $stmt->error; // Error handling
+        echo "Failed to update view count: " . $stmt->error;
         $stmt->close();
-        return false; // Failed to update
+        return false;
     }
 }
 
@@ -36,7 +36,7 @@ function fetchRecentPosts($conn, $limit, $offset) {
     $sql = "SELECT id, judul, isi, images, view FROM posts ORDER BY tanggal_publikasi DESC LIMIT ? OFFSET ?";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
-        die("SQL error: " . $conn->error); // Error handling
+        die("SQL error: " . $conn->error);
     }
     $stmt->bind_param("ii", $limit, $offset);
     $stmt->execute();
@@ -45,7 +45,7 @@ function fetchRecentPosts($conn, $limit, $offset) {
 
 // Function to fetch trending posts
 function fetchTrendingPosts($conn) {
-    $sql = "SELECT judul, isi, images, view FROM posts ORDER BY view DESC LIMIT 5"; // Adjust limit as needed
+    $sql = "SELECT id, judul, isi, images, view FROM posts ORDER BY view DESC LIMIT 5";
     return $conn->query($sql);
 }
 
@@ -54,7 +54,7 @@ $limit = 5; // Number of posts per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
 $offset = ($page - 1) * $limit; // Calculate offset
 
-// Fetch recent posts
+// Fetch recent posts and trending posts
 $recentPosts = fetchRecentPosts($conn, $limit, $offset);
 $trendingPosts = fetchTrendingPosts($conn);
 
@@ -72,7 +72,6 @@ if (isset($_GET['id'])) {
         echo "Failed to update view count.";
     }
 }
-
 ?>
 
 <!doctype html>
@@ -84,7 +83,6 @@ if (isset($_GET['id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style-starter.css">
     <style>
-        /* Add your CSS styles here */
         .sidebar {
             float: right;
             width: 30%;
@@ -109,44 +107,51 @@ if (isset($_GET['id'])) {
             background-color: #007bff;
             color: white;
         }
+        .trending-post h5 a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .trending-post h5 a:hover {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
-    <!-- header -->
-    <header class="w3l-header">
-        <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
-            <div class="container">
-                <a class="navbar-brand" href="index.php">
-                    <span class="fa fa-pencil-square-o"></span> Web Programming Blog</a>
-                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="fa icon-expand fa-bars"></span>
-                    <span class="fa icon-close fa-times"></span>
-                </button>
+<header class="w3l-header">
+    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
+        <div class="container">
+            <a class="navbar-brand" href="index.php">
+                <span class="fa fa-pencil-square-o"></span> Web Programming Blog</a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="fa icon-expand fa-bars"></span>
+                <span class="fa icon-close fa-times"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="index.php">Home</a>
-                        </li>
-                        <li class="nav-item dropdown @@category__active">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Categories <span class="fa fa-angle-down"></span>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item @@cp__active" href="technology.php">Technology posts</a>
-                                <a class="dropdown-item @@ls__active" href="lifestyle.php">Lifestyle posts</a>
-                            </div>
-                            <li class="nav-item @@about__active">
-                            <a class="nav-link" href="contact.html">Contact</a>
-                        </li>
-                        </li>
-                        <li class="nav-item @@about__active">
-                            <a class="nav-link" href="admin.php">Admin Dashboard</a>
-                        </li>
-                        <!--/search-right-->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="index.php">Home</a>
+                    </li>
+                    <li class="nav-item dropdown @@category__active">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Categories <span class="fa fa-angle-down"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item @@cp__active" href="technology.php">Technology posts</a>
+                            <a class="dropdown-item @@ls__active" href="lifestyle.php">Lifestyle posts</a>
+                        </div>
+                    </li>
+                    <li class="nav-item @@about__active">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item @@about__active">
+                        <a class="nav-link" href="admin.php">Admin Dashboard</a>
+                    </li>
+                    <!--/search-right-->
 				<div class="search-right mt-lg-0 mt-2">
 					<a href="#search" title="search"><span class="fa fa-search" aria-hidden="true"></span></a>
 					<!-- search popup -->
@@ -177,92 +182,86 @@ if (isset($_GET['id'])) {
                 </nav>
             </div>
             <!-- //toggle switch for light and dark theme -->
-		</div>
-	</nav>
-                    </ul>
-                </div>
+                </ul>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
 
-    <div class="w3l-homeblock1">
-        <div class="container pt-lg-5 pt-md-4">
-            <div class="main-content">
-                <h2 class="mb-4">Recent Posts</h2>
-                <?php
-                if ($recentPosts) {
-                    if ($recentPosts->num_rows > 0) {
-                        while ($row = $recentPosts->fetch_assoc()) {
-                            echo "<div class='post'>";
-                            echo "<h3><a href='artikel.php?id=" . $row['id'] . "'>" . htmlspecialchars($row['judul']) . "</a></h3>";
-                            echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
-                            echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
-                            if ($row['images']) {
-                                echo "<img src='uploads/" . htmlspecialchars($row['images']) . "' alt='Image' style='max-width:100%; height:auto;'>";
-                            }
-                            echo "</div>";
+<div class="w3l-homeblock1">
+    <div class="container pt-lg-5 pt-md-4">
+        <div class="main-content">
+            <h2 class="mb-4">Recent Posts</h2>
+            <?php
+            if ($recentPosts) {
+                if ($recentPosts->num_rows > 0) {
+                    while ($row = $recentPosts->fetch_assoc()) {
+                        echo "<div class='post'>";
+                        echo "<h3><a href='artikel.php?id=" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['judul']) . "</a></h3>";
+                        echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
+                        echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
+                        if ($row['images']) {
+                            echo "<img src='uploads/" . htmlspecialchars($row['images']) . "' alt='Image' style='max-width:100%; height:auto;'>";
                         }
-                    } else {
-                        echo "<p>No recent posts available.</p>";
+                        echo "</div>";
                     }
                 } else {
-                    echo "<p>Error fetching recent posts.</p>";
+                    echo "<p>No recent posts available.</p>";
                 }
-                ?>
+            } else {
+                echo "<p>Error fetching recent posts.</p>";
+            }
+            ?>
 
-                <!-- Pagination -->
-                <div class="pagination">
-                    <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>">Previous</a>
-                    <?php endif; ?>
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-                    <?php if ($page < $totalPages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>">Next</a>
-                    <?php endif; ?>
-                </div>
+            <!-- Pagination -->
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?php echo $page - 1; ?>">Previous</a>
+                <?php endif; ?>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?page=<?php echo $i; ?>" class="<?php echo $i === $page ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                <?php if ($page < $totalPages): ?>
+                    <a href="?page=<?php echo $page + 1; ?>">Next</a>
+                <?php endif; ?>
             </div>
+        </div>
 
-            <div class="sidebar">
-                <h2 class="mb-4">Trending Posts</h2>
-                <?php
-                if ($trendingPosts) {
-                    if ($trendingPosts->num_rows > 0) {
-                        while ($row = $trendingPosts->fetch_assoc()) {
-                            echo "<div class='trending-post'>";
-                            echo "<h5>" . htmlspecialchars($row['judul']) . "</h5>";
-                            echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
-                            echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
-                            if ($row['images']) {
-                                echo "<img src='uploads/" . htmlspecialchars($row['images']) . "' alt='Image' style='max-width:100%; height:auto;'>";
-                            }
-                            echo "</div>";
-                        }
-                    } else {
-                        echo "<p>No trending posts available.</p>";
+        <!-- Sidebar for Trending Posts -->
+        <div class="sidebar">
+            <h2 class="mb-4">Trending Posts</h2>
+            <?php
+            if ($trendingPosts) {
+                if ($trendingPosts->num_rows > 0) {
+                    while ($row = $trendingPosts->fetch_assoc()) {
+                        echo "<div class='trending-post'>";
+                        echo "<h5><a href='artikel.php?id=". htmlspecialchars($row['id']) ."'>" . htmlspecialchars($row['judul']) . "</a></h5>"; // Make title clickable
+                        echo "<p><strong>Views:</strong> " . htmlspecialchars($row['view']) . "</p>";
+                        echo "<p>" . nl2br(htmlspecialchars($row['isi'])) . "</p>";
+                        echo "</div>";
                     }
                 } else {
-                    echo "<p>Error fetching trending posts.</p>";
+                    echo "<p>No trending posts available.</p>";
                 }
-                ?>
-            </div>
+            } else {
+                echo "<p>Error fetching trending posts.</p>";
+            }
+            ?>
         </div>
     </div>
+</div>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 Web Programming. All Rights Reserved.</p>
-        </div>
-    </footer>
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Web Programming. All Rights Reserved.</p>
+    </div>
+</footer>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/theme-change.js"></script>
-</body>
-</html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/theme-change.js"></script>
 
 <?php
 $conn->close();
